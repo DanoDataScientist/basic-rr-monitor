@@ -1,0 +1,4 @@
+.idea/
+*.pyc
+.cache/
+_build/
