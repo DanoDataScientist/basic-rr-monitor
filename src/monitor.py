@@ -1,8 +1,26 @@
 import peakutils
+import RPi.GPIO as GPIO
+import time
+import Adafruit_ADS1x15
+
+# initialize ADC
+adc = Adafruit_ADS1x15.ADS1115()
+GAIN = 1
+ADC_IN = 0
+
+# initialize piezo
+PIN = 18                                # Use GPIO pin 18 as output
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(PIN, GPIO.OUT)
+
+# alarm conditions
+LL = 10                                 # lower limit: 10 breaths per minute
+UL = 70                                 # upper limit: 70 breaths per minute
 
 RR = 0
-WINDOW_SIZE = 10
-FS = 5
+WINDOW_SIZE = 10                        # Determined RR from a 10-second window
+FS = 100                                # Sample at 100 Hz
+DELAY = 1/FS
 DATA = []
 
 def power_on_sound():
