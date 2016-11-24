@@ -2,6 +2,7 @@ import peakutils
 import RPi.GPIO as GPIO
 import time
 import Adafruit_ADS1x15
+from collections import deque
 
 # initialize ADC
 adc = Adafruit_ADS1x15.ADS1115()
@@ -18,37 +19,102 @@ LL = 10                                 # lower limit: 10 breaths per minute
 UL = 70                                 # upper limit: 70 breaths per minute
 
 RR = 0
-WINDOW_SIZE = 10                        # Determined RR from a 10-second window
+
+SECONDS_PER_MINUTE = 60
 FS = 100                                # Sample at 100 Hz
 DELAY = 1/FS
-DATA = []
+WINDOW_DURATION = 10                        # Determine RR from a 10-second window
+WINDOW_SIZE = WINDOW_DURATION / DELAY
+WINDOW = deque([], WINDOW_SIZE)
+
 
 def power_on_sound():
-    pass
+    """
+    Sound the piezo buzzer for 1 second to indicate start up.
+    :return:
+    """
+    GPIO.output(PIN, True)
+    time.sleep(1)
+    GPIO.output(PIN, False)
 
-def init_LCD(init_RR):
-    pass
+
+def init_LCD():
+    """
+    Initialize LCD with initial RR and error message if needed.
+    :return:
+    """
+    print(RR)
+
 
 def update_LCD():
-    pass
+    """
+    Update LCD with RR and error message if needed.
+    """
+    print(RR)
+
+
+def sound_alarm():
+    """
+    Sound the piezo buzzer.
+    :return:
+    """
+    for i in range(5):
+        GPIO.output(PIN, True)
+        time.sleep(0.01)
+        GPIO.output(PIN, False)
+        time.sleep(0.01)
+
 
 def check_alarm_conditions():
-    pass
+    """
+    Check that respiratory rate is within acceptable limits
+    :return: return error message if outside of acceptable limits.
+    """
+    if RR < LL:
+        return "Respiration rate is too low!"
+    elif RR > UL:
+        return "Respiration rate is too high!"
+    return ""
+
 
 def init_data():
-    pass
+    """
+    Initialize a full window of data to make initial RR estimate.
+    """
+    for i in range(WINDOW_SIZE):
+        sample_data()
+    calc_RR()
+
 
 def sample_data():
-    pass
+    """
+    Samples from the ADC and appends the current value to the window of data.
+    """
+    WINDOW.append(adc.get_last_result())
+    time.sleep(DELAY)
+
 
 def calc_RR():
-    pass
+    """
+    Uses most recent 10 seconds of data to calculate average RR
+    """
+    total = 0
+    peaks = peakutils.peak.indexes(WINDOW)
+    for i in range(0, len(peaks) - 1):
+        total += DELAY * (peaks[i + 1] - peaks[i])
+
+    try:
+        seconds_per_beat = total / (len(peaks) - 1)
+        RR = SECONDS_PER_MINUTE / seconds_per_beat
+    except ZeroDivisionError:
+        RR = -1
+
 
 def main():
     # initialize
     power_on_sound()
     init_data() # every x seconds, acquire sample until a window is full
-    init_LCD(calc_RR())
+    init_LCD()
 
     # main loop
     while True:
@@ -60,6 +126,8 @@ def main():
         check_alarm_conditions()
         # update LCD
         update_LCD()
+
+        time.sleep(DELAY)
 
 if __name__ == "__main__":
     main()
