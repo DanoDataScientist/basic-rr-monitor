@@ -38,7 +38,7 @@ def power_on_sound():
     GPIO.output(PIN, False)
 
 
-def init_LCD():
+def init_lcd():
     """
     Initialize LCD with initial RR and error message if needed.
     :return:
@@ -46,7 +46,7 @@ def init_LCD():
     print(RR)
 
 
-def update_LCD():
+def update_lcd():
     """
     Update LCD with RR and error message if needed.
     """
@@ -83,7 +83,7 @@ def init_data():
     """
     for i in range(WINDOW_SIZE):
         sample_data()
-    calc_RR()
+    calc_rr()
 
 
 def sample_data():
@@ -94,7 +94,7 @@ def sample_data():
     time.sleep(DELAY)
 
 
-def calc_RR():
+def calc_rr():
     """
     Uses most recent 10 seconds of data to calculate average RR
     """
@@ -114,18 +114,18 @@ def main():
     # initialize
     power_on_sound()
     init_data() # every x seconds, acquire sample until a window is full
-    init_LCD()
+    init_lcd()
 
     # main loop
     while True:
         # every x seconds, sample resistance
         sample_data()
         # update RR estimate
-        calc_RR()
+        calc_rr()
         # check for alarm conditions
         check_alarm_conditions()
         # update LCD
-        update_LCD()
+        update_lcd()
 
         time.sleep(DELAY)
 
