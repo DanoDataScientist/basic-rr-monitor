@@ -70,6 +70,9 @@ class Graph(tk.Frame):
         canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    def update_labels(self, RR, alarms):
+        
+
 
 app = GUI()
 ani = animation.FuncAnimation(f, animate, interval=1000)
