@@ -44,8 +44,6 @@ WINDOW_DURATION = 30                      # Determine RR from a 30-second window
 WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
 WINDOW = deque([], WINDOW_SIZE)
 
-APP = GUI()
-
 global counter
 counter = 0
 
@@ -124,12 +122,14 @@ def calc_rr():
         RR = -1
 
 def main(i):
+    global counter
     # main loop
     sample_data()
     if len(WINDOW) == WINDOW_SIZE:
         calc_rr()
         check_alarm_conditions()
     update_lcd()
+    APP.frame.update_labels(counter)
     # time.sleep(DELAY)
     
 
@@ -146,17 +146,17 @@ class GUI(tk.Tk):
 
         self.frames = {}
 
-        frame = Graph(container, self)
+        self.frame = Graph(container, self)
 
-        self.frames[Graph] = frame
+        self.frames[Graph] = self.frame
 
-        frame.grid(row=0, column=0, sticky="nsew")
+        self.frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(Graph)
 
     def show_frame(self, cont):
-        frame = self.frames[cont]
-        frame.tkraise()
+        self.frame = self.frames[cont]
+        self.frame.tkraise()
 
 
 class Graph(tk.Frame):
@@ -180,8 +180,7 @@ class Graph(tk.Frame):
         self.rr.set(str(RR))
         
 
-
-if __name__ == "__main__":
-    power_on_sound()
-    ani = animation.FuncAnimation(f, main, interval=10)
-    APP.mainloop()
+APP = GUI()
+power_on_sound()
+ani = animation.FuncAnimation(f, main, interval=10)
+APP.mainloop()
