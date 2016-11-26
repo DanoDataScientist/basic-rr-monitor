@@ -129,7 +129,7 @@ def main(i):
         calc_rr()
         check_alarm_conditions()
     update_lcd()
-    APP.frame.update_labels(counter)
+    APP.frame.update_labels(len(WINDOW))
     # time.sleep(DELAY)
     
 
