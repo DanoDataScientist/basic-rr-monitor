@@ -44,6 +44,8 @@ WINDOW_DURATION = 30                      # Determine RR from a 30-second window
 WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
 WINDOW = deque([], WINDOW_SIZE)
 
+APP = GUI()
+
 global counter
 counter = 0
 
@@ -181,7 +183,5 @@ class Graph(tk.Frame):
 
 if __name__ == "__main__":
     power_on_sound()
-    global app
-    app = GUI()
     ani = animation.FuncAnimation(f, main, interval=10)
-    app.mainloop()
+    APP.mainloop()
