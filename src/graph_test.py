@@ -33,12 +33,11 @@ def animate(i):
     a.plot(xList, yList)
 
 
-class SeaofBTCapp(tk.Tk):
+class GUI(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        # tk.Tk.iconbitmap(self, default="clienticon.ico")
-        tk.Tk.wm_title(self, "Sea of BTC client")
+        tk.Tk.wm_title(self, "RR Monitor")
 
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
@@ -47,20 +46,20 @@ class SeaofBTCapp(tk.Tk):
 
         self.frames = {}
 
-        frame = PageThree(container, self)
+        frame = Graph(container, self)
 
-        self.frames[PageThree] = frame
+        self.frames[Graph] = frame
 
         frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(PageThree)
+        self.show_frame(Graph)
 
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
 
 
-class PageThree(tk.Frame):
+class Graph(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
@@ -69,12 +68,9 @@ class PageThree(tk.Frame):
         canvas = FigureCanvasTkAgg(f, self)
         canvas.show()
         canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-
-        toolbar = NavigationToolbar2TkAgg(canvas, self)
-        toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 
-app = SeaofBTCapp()
+app = GUI()
 ani = animation.FuncAnimation(f, animate, interval=1000)
 app.mainloop()
