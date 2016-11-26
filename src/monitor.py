@@ -4,6 +4,23 @@ import time
 import Adafruit_ADS1x15
 from collections import deque
 
+import matplotlib
+
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
+from matplotlib import style
+
+import Tkinter as tk
+import numpy as np
+
+LARGE_FONT = ("Verdana", 12)
+style.use("ggplot")
+
+f = Figure(figsize=(5, 5), dpi=100)
+a = f.add_subplot(111)
+
 # initialize ADC
 adc = Adafruit_ADS1x15.ADS1115()
 GAIN = 1
@@ -27,6 +44,8 @@ WINDOW_DURATION = 30                      # Determine RR from a 30-second window
 WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
 WINDOW = deque([], WINDOW_SIZE)
 
+global counter
+counter = 0
 
 def power_on_sound():
     """
@@ -38,19 +57,21 @@ def power_on_sound():
     GPIO.output(PIN, False)
 
 
-def init_lcd():
-    """
-    Initialize LCD with initial RR and error message if needed.
-    :return:
-    """
-    print(RR)
-
-
 def update_lcd():
     """
     Update LCD with RR and error message if needed.
     """
+    #xList = np.arange(0, len(WINDOW), 1)
+    #yList = WINDOW
+    #a.clear()
+    #a.plot(xList, yList)
     print(RR)
+    global counter
+    counter = counter + 1
+    xList = np.arange(0.0, 20.0, 0.01) + counter * 0.01
+    yList = np.sin(np.pi * xList)
+    a.clear()
+    a.plot(xList, yList)
 
 
 def sound_alarm():
@@ -76,16 +97,6 @@ def check_alarm_conditions():
         return "Respiration rate is too high!"
     return ""
 
-
-def init_data():
-    """
-    Initialize a full window of data to make initial RR estimate.
-    """
-    for i in range(WINDOW_SIZE):
-        sample_data()
-    calc_rr()
-
-
 def sample_data():
     """
     Samples from the ADC and appends the current value to the window of data.
@@ -110,25 +121,67 @@ def calc_rr():
     except ZeroDivisionError:
         RR = -1
 
-
-def main():
-    # initialize
-    init_data() # every x seconds, acquire sample until a window is full
-    init_lcd()
-    power_on_sound()
-    
+def main(i):
     # main loop
-    while True:
-        # every x seconds, sample resistance
-        sample_data()
-        # update RR estimate
+    sample_data()
+    if len(WINDOW) == WINDOW_SIZE:
         calc_rr()
-        # check for alarm conditions
         check_alarm_conditions()
-        # update LCD
-        update_lcd()
+    update_lcd()
+    # time.sleep(DELAY)
+    
 
-        time.sleep(DELAY)
+class GUI(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+
+        tk.Tk.wm_title(self, "RR Monitor")
+
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+
+        frame = Graph(container, self)
+
+        self.frames[Graph] = frame
+
+        frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(Graph)
+
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
+
+
+class Graph(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        self.rr = tk.StringVar()
+        self.rr.set("Respiration Rate: ")
+        
+        rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT)
+        rr_label.pack(pady=10, padx=10)
+
+        canvas = FigureCanvasTkAgg(f, self)
+        canvas.show()
+        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def update_labels(self, RR):
+        self.rr.set(str(RR))
+        
+
 
 if __name__ == "__main__":
-    main()
+    power_on_sound()
+    global app
+    app = GUI()
+    ani = animation.FuncAnimation(f, main, interval=10)
+    app.mainloop()
