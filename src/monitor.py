@@ -32,17 +32,17 @@ def update_lcd():
     """
     Update LCD with RR and error message if needed.
     """
-    #xList = np.arange(0, len(WINDOW), 1)
-    #yList = WINDOW
-    #a.clear()
-    #a.plot(xList, yList)
-    print(RR)
-    global counter
-    counter = counter + 1
-    xList = np.arange(0.0, 20.0, 0.01) + counter * 0.01
-    yList = np.sin(np.pi * xList)
+    xList = np.multiply(DELAY, np.arange(0, len(WINDOW), 1))
+    yList = WINDOW
     a.clear()
     a.plot(xList, yList)
+    print(RR)
+    #global counter
+    #counter = counter + 1
+    #xList = np.arange(0.0, 20.0, 0.01) + counter * 0.01
+    #yList = np.sin(np.pi * xList)
+    #a.clear()
+    #a.plot(xList, yList)
 
 
 def sound_alarm():
@@ -182,5 +182,5 @@ if __name__ == "__main__":
 
     app = GUI()
     power_on_sound()
-    ani = animation.FuncAnimation(f, main, interval=10)
+    ani = animation.FuncAnimation(f, main, interval=round(DELAY * 1000))
     app.mainloop()
