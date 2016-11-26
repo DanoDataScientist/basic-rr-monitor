@@ -15,35 +15,6 @@ from matplotlib import style
 import Tkinter as tk
 import numpy as np
 
-LARGE_FONT = ("Verdana", 12)
-style.use("ggplot")
-
-f = Figure(figsize=(5, 5), dpi=100)
-a = f.add_subplot(111)
-
-# initialize ADC
-adc = Adafruit_ADS1x15.ADS1115()
-GAIN = 1
-ADC_IN = 0
-
-# initialize piezo
-PIN = 18                                # Use GPIO pin 18 as output
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(PIN, GPIO.OUT)
-
-# alarm conditions
-LL = 10                                 # lower limit: 10 breaths per minute
-UL = 70                                 # upper limit: 70 breaths per minute
-
-RR = 0
-
-SECONDS_PER_MINUTE = 60
-FS = 100                                # Sample at 100 Hz
-DELAY = float(1)/FS
-WINDOW_DURATION = 30                      # Determine RR from a 30-second window
-WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
-WINDOW = deque([], WINDOW_SIZE)
-
 global counter
 counter = 0
 
@@ -129,7 +100,7 @@ def main(i):
         calc_rr()
         check_alarm_conditions()
     update_lcd()
-    APP.frame.update_labels(len(WINDOW))
+    app.frame.update_labels(len(WINDOW))
     # time.sleep(DELAY)
     
 
@@ -179,8 +150,37 @@ class Graph(tk.Frame):
     def update_labels(self, RR):
         self.rr.set(str(RR))
         
+if __name__ == "__main__":
+    LARGE_FONT = ("Verdana", 12)
+    style.use("ggplot")
 
-APP = GUI()
-power_on_sound()
-ani = animation.FuncAnimation(f, main, interval=10)
-APP.mainloop()
+    f = Figure(figsize=(5, 5), dpi=100)
+    a = f.add_subplot(111)
+
+    # initialize ADC
+    adc = Adafruit_ADS1x15.ADS1115()
+    GAIN = 1
+    ADC_IN = 0
+
+    # initialize piezo
+    PIN = 18  # Use GPIO pin 18 as output
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(PIN, GPIO.OUT)
+
+    # alarm conditions
+    LL = 10  # lower limit: 10 breaths per minute
+    UL = 70  # upper limit: 70 breaths per minute
+
+    RR = 0
+
+    SECONDS_PER_MINUTE = 60
+    FS = 100  # Sample at 100 Hz
+    DELAY = float(1) / FS
+    WINDOW_DURATION = 30  # Determine RR from a 30-second window
+    WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
+    WINDOW = deque([], WINDOW_SIZE)
+
+    app = GUI()
+    power_on_sound()
+    ani = animation.FuncAnimation(f, main, interval=10)
+    app.mainloop()
