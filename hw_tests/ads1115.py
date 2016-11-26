@@ -17,10 +17,11 @@ adc.start_adc(CHANNEL, gain=GAIN)
 # Read channel 0 for 5 seconds and print out its values.
 print('Reading ADS1x15 channel 0 for 5 seconds...')
 start = time.time()
-while (time.time() - start) <= 5.0:
+while (time.time() - start) <= 100.0:
     # Read the last ADC conversion value and print it out.
     value = adc.get_last_result()
     print('Channel 0: {0}'.format(value))
+    #print(float(value) / 4750 * 3.3)
     # Sleep for half a second.
     time.sleep(0.5)
 

@@ -22,9 +22,9 @@ RR = 0
 
 SECONDS_PER_MINUTE = 60
 FS = 100                                # Sample at 100 Hz
-DELAY = 1/FS
-WINDOW_DURATION = 10                        # Determine RR from a 10-second window
-WINDOW_SIZE = WINDOW_DURATION / DELAY
+DELAY = float(1)/FS
+WINDOW_DURATION = 30                      # Determine RR from a 30-second window
+WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
 WINDOW = deque([], WINDOW_SIZE)
 
 
@@ -90,7 +90,8 @@ def sample_data():
     """
     Samples from the ADC and appends the current value to the window of data.
     """
-    WINDOW.append(adc.get_last_result())
+    val = adc.read_adc_difference(ADC_IN, gain=GAIN)
+    WINDOW.append(val)
     time.sleep(DELAY)
 
 
@@ -112,10 +113,10 @@ def calc_rr():
 
 def main():
     # initialize
-    power_on_sound()
     init_data() # every x seconds, acquire sample until a window is full
     init_lcd()
-
+    power_on_sound()
+    
     # main loop
     while True:
         # every x seconds, sample resistance
