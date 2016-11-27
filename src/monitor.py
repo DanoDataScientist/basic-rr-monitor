@@ -36,13 +36,6 @@ def update_lcd():
     yList = WINDOW
     a.clear()
     a.plot(xList, yList)
-    print(RR)
-    #global counter
-    #counter = counter + 1
-    #xList = np.arange(0.0, 20.0, 0.01) + counter * 0.01
-    #yList = np.sin(np.pi * xList)
-    #a.clear()
-    #a.plot(xList, yList)
 
 
 def sound_alarm():
@@ -62,9 +55,9 @@ def check_alarm_conditions():
     Check that respiratory rate is within acceptable limits
     :return: return error message if outside of acceptable limits.
     """
-    if RR < LL:
+    if int(RR) < LL:
         return "Respiration rate is too low!"
-    elif RR > UL:
+    elif int(RR) > UL:
         return "Respiration rate is too high!"
     return ""
 
@@ -74,33 +67,34 @@ def sample_data():
     """
     val = adc.read_adc_difference(ADC_IN, gain=GAIN)
     WINDOW.append(val)
-    time.sleep(DELAY)
-
+    
 
 def calc_rr():
     """
     Uses most recent 10 seconds of data to calculate average RR
     """
-    total = 0
     peaks = peakutils.peak.indexes(WINDOW)
-    for i in range(0, len(peaks) - 1):
-        total += DELAY * (peaks[i + 1] - peaks[i])
+    # for i in range(0, len(peaks) - 1):
+    #     total += DELAY * (peaks[i + 1] - peaks[i])
 
     try:
-        seconds_per_beat = total / (len(peaks) - 1)
-        RR = SECONDS_PER_MINUTE / seconds_per_beat
+        beats_per_second = len(peaks) / WINDOW_DURATION
+        RR = str(beats_per_second / SECONDS_PER_MINUTE)
     except ZeroDivisionError:
-        RR = -1
+        RR = str(-1)
 
 def main(i):
     global counter
     # main loop
+    print 'start'
+    print time.time()
     sample_data()
     if len(WINDOW) == WINDOW_SIZE:
         calc_rr()
         check_alarm_conditions()
     update_lcd()
-    app.frame.update_labels(len(WINDOW))
+    app.frame.update_labels(RR)
+    print time.time()
     # time.sleep(DELAY)
     
 
@@ -148,7 +142,7 @@ class Graph(tk.Frame):
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def update_labels(self, RR):
-        self.rr.set(str(RR))
+        self.rr.set(RR)
         
 if __name__ == "__main__":
     LARGE_FONT = ("Verdana", 12)
@@ -156,6 +150,7 @@ if __name__ == "__main__":
 
     f = Figure(figsize=(5, 5), dpi=100)
     a = f.add_subplot(111)
+    a.axis('off')
 
     # initialize ADC
     adc = Adafruit_ADS1x15.ADS1115()
@@ -171,16 +166,17 @@ if __name__ == "__main__":
     LL = 10  # lower limit: 10 breaths per minute
     UL = 70  # upper limit: 70 breaths per minute
 
-    RR = 0
+    RR = 'NOT ENOUGH DATA YET.'
 
     SECONDS_PER_MINUTE = 60
-    FS = 100  # Sample at 100 Hz
+    FS = 1000  # Sample at 100 Hz
     DELAY = float(1) / FS
-    WINDOW_DURATION = 30  # Determine RR from a 30-second window
+    WINDOW_DURATION = 10  # Determine RR from a 10-second window
     WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
     WINDOW = deque([], WINDOW_SIZE)
+    TIME = deque([], WINDOW_SIZE)
 
     app = GUI()
     power_on_sound()
-    ani = animation.FuncAnimation(f, main, interval=round(DELAY * 1000))
+    ani = animation.FuncAnimation(f, main, interval=1)
     app.mainloop()
