@@ -4,7 +4,13 @@ Basic respiration rate monitor for infants (BME 462: Design for the Developing W
 To install:
 
 sudo apt-get update
+
 sudo apt-get install git
+
 git clone this-repo
+
 sudo pip install adafruit-ads1x15
+
 sudo apt-get install python-scipy python-numpy python-matplotlib
+
+sudo pip install peakutils
