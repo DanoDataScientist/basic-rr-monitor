@@ -21,6 +21,9 @@ import threading
 global counter
 counter = 0
 
+SCREEN_WIDTH = 320
+SCREEN_HEIGHT = 240
+
 def power_on_sound():
     """
     Sound the piezo buzzer for 1 second to indicate start up.
@@ -120,10 +123,17 @@ class GUI(tk.Tk):
 
         tk.Tk.wm_title(self, "RR Monitor")
 
-        container = tk.Frame(self, width=320, height=240)
+        container = tk.Frame(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
+
+        w = SCREEN_WIDTH;
+        h = SCREEN_HEIGHT
+        x = 0
+        y = 0
+
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
         self.frames = {}
 
@@ -142,7 +152,7 @@ class GUI(tk.Tk):
 
 class Graph(tk.Frame):
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent, width=320, height=240)
+        tk.Frame.__init__(self, parent, width=SCREEN_WIDTH, height=SCREEN_WIDTH)
         label = tk.Label(self, text="Infant Respiration Monitor", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
