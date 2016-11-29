@@ -120,7 +120,7 @@ class GUI(tk.Tk):
 
         tk.Tk.wm_title(self, "RR Monitor")
 
-        container = tk.Frame(self, width=800, height=480)
+        container = tk.Frame(self, width=320, height=240)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -142,7 +142,7 @@ class GUI(tk.Tk):
 
 class Graph(tk.Frame):
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent, width=800, height=480)
+        tk.Frame.__init__(self, parent, width=320, height=240)
         label = tk.Label(self, text="Infant Respiration Monitor", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     LARGE_FONT = ("Verdana", 12)
     style.use("ggplot")
 
-    f = Figure(figsize=(8, 4.5), dpi=100)
+    f = Figure(figsize=(3, 1.5), dpi=100)
     a = f.add_subplot(111)
 
     # initialize ADC
