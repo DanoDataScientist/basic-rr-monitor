@@ -21,6 +21,10 @@ import threading
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 240
 
+global start_time
+start_time = 0
+
+
 def power_on_sound():
     """
     Sound the piezo buzzer for 1 second to indicate start up.
@@ -41,6 +45,7 @@ def update_lcd():
     a.plot(TIMES, WINDOW)
     a.axis('off')
 
+
 def sound_alarm():
     """
     Sound the piezo buzzer.
@@ -58,7 +63,7 @@ def check_alarm_conditions(RR):
     Check that respiratory rate is within acceptable limits
     :return: return error message if outside of acceptable limits.
     """
-    global ALARM_TRIGGER_COUNTER
+    global ALARM_TRIGGER_COUNTER, start_time
     message = ""
     if float(RR) < LL:
         message = "Respiration rate is too low!"
@@ -66,16 +71,18 @@ def check_alarm_conditions(RR):
         message = "Respiration rate is too high!"
 
     if message != "":
+        if ALARM_TRIGGER_COUNTER == 0:
+            start_time = time.time()
         if threading.active_count() < 2 and ALARM_TRIGGER_COUNTER >= 20:
+            print(time.time() - start_time)
             thread = AlarmThread()
             thread.start()
         ALARM_TRIGGER_COUNTER = ALARM_TRIGGER_COUNTER + 1
     else:
         ALARM_TRIGGER_COUNTER = 0
 
-        
     return message
-            
+
 
 def sample_data():
     """
@@ -84,7 +91,7 @@ def sample_data():
     val = adc.read_adc_difference(ADC_IN, gain=GAIN)
     WINDOW.append(val)
     TIMES.append(time.time() - START_TIME)
-    
+
 
 def calc_rr():
     """
@@ -100,6 +107,7 @@ def calc_rr():
     print(RR)
     return RR
 
+
 def main(i):
     # main loop
     global RR
@@ -112,14 +120,16 @@ def main(i):
     app.frame.update_labels(RR, message)
     print(threading.active_count())
     # time.sleep(DELAY)
-    
+
+
 class AlarmThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
 
     def run(self):
         sound_alarm()
-    
+
+
 class GUI(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -161,7 +171,7 @@ class Graph(tk.Frame):
 
         self.rr = tk.StringVar()
         self.rr.set("Respiration Rate: ")
-        
+
         rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT)
         rr_label.pack(pady=10, padx=10)
 
@@ -177,7 +187,8 @@ class Graph(tk.Frame):
             self.rr.set("Respiration Rate: " + str(round(float(RR), 2)))
         else:
             self.rr.set(message + "(RR = " + str(round(float(RR), 2)) + ")")
-        
+
+
 if __name__ == "__main__":
     LARGE_FONT = ("Verdana", 12)
     style.use("ggplot")
@@ -201,12 +212,12 @@ if __name__ == "__main__":
 
     RR = 'Not enough data yet.'
     START_TIME = time.time()
-    
+
     SECONDS_PER_MINUTE = 60
     FS = 1000  # Sample at 100 Hz
     DELAY = float(1) / FS
     WINDOW_DURATION = 10  # Determine RR from a 10-second window
-    #WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
+    # WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
     WINDOW_SIZE = 30
     global ALARM_TRIGGER_COUNTER
     ALARM_TRIGGER_COUNTER = 0
