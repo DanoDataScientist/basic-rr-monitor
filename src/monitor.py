@@ -49,7 +49,7 @@ def sound_alarm():
     Sound the piezo buzzer.
     :return:
     """
-    for i in range(5):
+    for i in range(10):
         GPIO.output(PIN, True)
         time.sleep(0.5)
         GPIO.output(PIN, False)
