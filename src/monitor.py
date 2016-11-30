@@ -51,7 +51,7 @@ def sound_alarm():
     """
     for i in range(5):
         GPIO.output(PIN, True)
-        time.sleep(0.2)
+        time.sleep(0.5)
         GPIO.output(PIN, False)
         time.sleep(0.1)
 
