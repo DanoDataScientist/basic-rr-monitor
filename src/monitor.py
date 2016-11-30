@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 import time
 import Adafruit_ADS1x15
 from collections import deque
+from subprocess import call
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -20,6 +21,11 @@ import threading
 
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 240
+
+
+def shutdown(pin):
+    call('halt', shell=False)
+    
 
 def power_on_sound():
     """
@@ -213,6 +219,10 @@ if __name__ == "__main__":
 
     WINDOW = deque([], WINDOW_SIZE)
     TIMES = deque([], WINDOW_SIZE)
+
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(21, GPIO.IN)
+    GPIO.add_event_detect(21, GPIO.RISING, callback=shutdown, bouncetime=100)
 
     app = GUI()
     power_on_sound()
