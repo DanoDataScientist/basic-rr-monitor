@@ -113,7 +113,7 @@ def calc_rr():
         f.writelines([str(x) + ',' for x in arr])
 
     # peaks = peakutils.peak.indexes(arr, thres=0.01, min_dist=5)
-    peaks = peakdet(arr, 1)
+    peaks = peakdet(arr, 5)
     peaks = peaks[0]
     print(peaks)
     print(len(peaks))
