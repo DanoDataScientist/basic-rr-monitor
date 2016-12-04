@@ -43,8 +43,9 @@ def update_lcd():
     """
     Update LCD with RR and error message if needed.
     """
+    from numpy import array
     a.clear()
-    a.plot(TIMES, WINDOW)
+    a.plot(TIMES, moving_avg(array(WINDOW)))
     a.axis('off')
 
 def sound_alarm():
@@ -90,17 +91,36 @@ def sample_data():
     val = adc.read_adc_difference(ADC_IN, gain=GAIN)
     WINDOW.append(val)
     TIMES.append(time.time() - START_TIME)
-    
+
+def moving_avg(arr):
+    ret = []
+    ret.append(arr[0])
+    for i in range(1, len(arr) - 1):
+        ret.append(float(arr[i-1] + arr[i] + arr[i + 1])/3)
+    if len(arr) != len(ret):
+        ret.append(arr[len(arr) - 1])
+    return ret
 
 def calc_rr():
     """
     Uses most recent 10 seconds of data to calculate average RR
     """
     from numpy import array
-    peaks = peakutils.peak.indexes(array(WINDOW), 0.7, 5)
+    import sys
+    arr = array(moving_avg(array(WINDOW)))
+    print(len(arr))
+    print(arr)
+    with open('test.txt', 'w') as f:
+        f.writelines([str(x) for x in arr])
+
+    peaks = peakutils.peak.indexes(arr, 0, 5)
+    print(peaks)
     print(len(peaks))
+    sys.exit(0)
+
     try:
         beats_per_second = len(peaks) / (TIMES[len(TIMES) - 1] - TIMES[0])
+        print(TIMES[len(TIMES) - 1] - TIMES[0])
         RR = str(beats_per_second * SECONDS_PER_MINUTE)
     except ZeroDivisionError:
         RR = str(-1)
@@ -112,8 +132,8 @@ def main(i):
     sample_data()
     message = ""
     if len(WINDOW) == WINDOW_SIZE:
+        print(time.time() - START_TIME)
         RR = calc_rr()
-        message = check_alarm_conditions(RR)
     update_lcd()
     app.frame.update_labels(RR, message)
     # time.sleep(DELAY)
@@ -212,7 +232,7 @@ if __name__ == "__main__":
     DELAY = float(1) / FS
     WINDOW_DURATION = 10  # Determine RR from a 10-second window
     #WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
-    WINDOW_SIZE = 30
+    WINDOW_SIZE = 120 # 120 was 20 seconds
     global ALARM_TRIGGER_COUNTER
     ALARM_TRIGGER_COUNTER = 0
 
@@ -224,6 +244,5 @@ if __name__ == "__main__":
     GPIO.add_event_detect(21, GPIO.RISING, callback=shutdown, bouncetime=100)
 
     app = GUI()
-    power_on_sound()
     ani = animation.FuncAnimation(f, main, interval=1)
     app.mainloop()

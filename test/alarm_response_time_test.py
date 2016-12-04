@@ -98,13 +98,11 @@ def calc_rr():
     Uses most recent 10 seconds of data to calculate average RR
     """
     peaks = peakutils.peak.indexes(WINDOW)
-    print(peaks)
     try:
         beats_per_second = len(peaks) / (TIMES[len(TIMES) - 1] - TIMES[0])
         RR = str(beats_per_second * SECONDS_PER_MINUTE)
     except ZeroDivisionError:
         RR = str(-1)
-    print(RR)
     return RR
 
 
@@ -118,7 +116,6 @@ def main(i):
         message = check_alarm_conditions(RR)
     update_lcd()
     app.frame.update_labels(RR, message)
-    print(threading.active_count())
     # time.sleep(DELAY)
 
 
