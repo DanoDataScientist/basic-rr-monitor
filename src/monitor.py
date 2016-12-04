@@ -178,8 +178,8 @@ class Graph(tk.Frame):
         self.rr = tk.StringVar()
         self.rr.set("Respiration Rate: ")
 
-        rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT)
-        rr_label.pack(pady=10, padx=10)
+        self.rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT, fg = COLORS[0])
+        self.rr_label.pack(pady=10, padx=10)
 
         canvas = FigureCanvasTkAgg(f, self)
         canvas.show()
@@ -193,6 +193,11 @@ class Graph(tk.Frame):
             self.rr.set("Respiration Rate: " + str(round(float(RR), 2)))
         else:
             self.rr.set(message + "(RR = " + str(round(float(RR), 2)) + ")")
+
+        dist = abs(RR - MEAN)
+        self.rr_label.configure(fg = COLORS[round(dist / DELTA)])
+
+
 
 if __name__ == "__main__":
     LARGE_FONT = ("Verdana", 12)
@@ -212,8 +217,10 @@ if __name__ == "__main__":
     GPIO.setup(PIN, GPIO.OUT)
 
     # alarm conditions
-    LL = 10  # lower limit: 10 breaths per minute
-    UL = 70  # upper limit: 70 breaths per minute
+    LL = 30  # lower limit: 10 breaths per minute
+    UL = 60  # upper limit: 70 breaths per minute
+    MEAN = (LL + UL) / 2
+    DELTA = float(UL - LL) / 2
 
     RR = 'Not enough data yet.'
     START_TIME = time.time()
@@ -226,6 +233,8 @@ if __name__ == "__main__":
     WINDOW_SIZE = 120
     global ALARM_TRIGGER_COUNTER
     ALARM_TRIGGER_COUNTER = 0
+
+    COLORS = ['green', 'dark green', 'red', 'firebrick']
 
     WINDOW = deque([], WINDOW_SIZE)
     TIMES = deque([], WINDOW_SIZE)
