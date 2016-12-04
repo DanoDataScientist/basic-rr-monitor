@@ -107,13 +107,14 @@ def calc_rr():
     """
     from numpy import array
     import sys
+    from peakdet import peakdet
     arr = array(moving_avg(array(WINDOW)))
-    print(len(arr))
-    print(arr)
     with open('test.txt', 'w') as f:
         f.writelines([str(x) + ',' for x in arr])
 
-    peaks = peakutils.peak.indexes(arr, 0, 5)
+    # peaks = peakutils.peak.indexes(arr, thres=0.01, min_dist=5)
+    peaks = peakdet(arr, 1)
+    peaks = peaks[0]
     print(peaks)
     print(len(peaks))
     sys.exit(0)
