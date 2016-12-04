@@ -43,6 +43,7 @@ def update_lcd():
     """
     Update LCD with RR and error message if needed.
     """
+    from numpy import array
     a.clear()
     a.plot(TIMES, moving_avg(array(WINDOW)))
     a.axis('off')
@@ -178,7 +179,7 @@ class Graph(tk.Frame):
         self.rr = tk.StringVar()
         self.rr.set("Respiration Rate: ")
 
-        self.rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT, fg = COLORS[0])
+        self.rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT, bg = COLORS[0])
         self.rr_label.pack(pady=10, padx=10)
 
         canvas = FigureCanvasTkAgg(f, self)
@@ -194,8 +195,9 @@ class Graph(tk.Frame):
         else:
             self.rr.set(message + "(RR = " + str(round(float(RR), 2)) + ")")
 
-        dist = abs(RR - MEAN)
-        self.rr_label.configure(fg = COLORS[round(dist / DELTA)])
+        if RR != "Not enough data yet.":
+            dist = abs(float(RR) - MEAN)
+            self.rr_label.configure(bg = COLORS[min(len(COLORS) - 1, int(dist / DELTA))])
 
 
 
@@ -220,7 +222,7 @@ if __name__ == "__main__":
     LL = 30  # lower limit: 10 breaths per minute
     UL = 60  # upper limit: 70 breaths per minute
     MEAN = (LL + UL) / 2
-    DELTA = float(UL - LL) / 2
+    DELTA = float(UL - MEAN) / 2
 
     RR = 'Not enough data yet.'
     START_TIME = time.time()
@@ -234,7 +236,7 @@ if __name__ == "__main__":
     global ALARM_TRIGGER_COUNTER
     ALARM_TRIGGER_COUNTER = 0
 
-    COLORS = ['green', 'dark green', 'red', 'firebrick']
+    COLORS = ['lime green', 'dark green', 'red', 'red4']
 
     WINDOW = deque([], WINDOW_SIZE)
     TIMES = deque([], WINDOW_SIZE)
