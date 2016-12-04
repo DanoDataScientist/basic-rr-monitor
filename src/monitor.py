@@ -25,7 +25,7 @@ SCREEN_HEIGHT = 240
 
 def shutdown(pin):
     call('halt', shell=False)
-    
+
 
 def power_on_sound():
     """
@@ -44,7 +44,7 @@ def update_lcd():
     Update LCD with RR and error message if needed.
     """
     a.clear()
-    a.plot(TIMES, WINDOW)
+    a.plot(TIMES, moving_avg(array(WINDOW)))
     a.axis('off')
 
 def sound_alarm():
@@ -79,9 +79,9 @@ def check_alarm_conditions(RR):
     else:
         ALARM_TRIGGER_COUNTER = 0
 
-        
+
     return message
-            
+
 
 def sample_data():
     """
@@ -90,14 +90,25 @@ def sample_data():
     val = adc.read_adc_difference(ADC_IN, gain=GAIN)
     WINDOW.append(val)
     TIMES.append(time.time() - START_TIME)
-    
+
+def moving_avg(arr):
+    ret = []
+    ret.append(arr[0])
+    for i in range(1, len(arr) - 1):
+        ret.append(float(arr[i-1] + arr[i] + arr[i + 1])/3)
+    if len(arr) != len(ret):
+        ret.append(arr[len(arr) - 1])
+    return ret
 
 def calc_rr():
     """
     Uses most recent 10 seconds of data to calculate average RR
     """
     from numpy import array
-    peaks = peakutils.peak.indexes(array(WINDOW), 0.7, 5)
+    from peakdet import peakdet
+    arr = array(moving_avg(array(WINDOW)))
+    peaks = peakdet(arr, 1)
+    peaks = peaks[0]
     print(len(peaks))
     try:
         beats_per_second = len(peaks) / (TIMES[len(TIMES) - 1] - TIMES[0])
@@ -117,14 +128,14 @@ def main(i):
     update_lcd()
     app.frame.update_labels(RR, message)
     # time.sleep(DELAY)
-    
+
 class AlarmThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
 
     def run(self):
         sound_alarm()
-    
+
 class GUI(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -166,7 +177,7 @@ class Graph(tk.Frame):
 
         self.rr = tk.StringVar()
         self.rr.set("Respiration Rate: ")
-        
+
         rr_label = tk.Label(self, textvariable=self.rr, font=LARGE_FONT)
         rr_label.pack(pady=10, padx=10)
 
@@ -182,7 +193,7 @@ class Graph(tk.Frame):
             self.rr.set("Respiration Rate: " + str(round(float(RR), 2)))
         else:
             self.rr.set(message + "(RR = " + str(round(float(RR), 2)) + ")")
-        
+
 if __name__ == "__main__":
     LARGE_FONT = ("Verdana", 12)
     style.use("ggplot")
@@ -206,13 +217,13 @@ if __name__ == "__main__":
 
     RR = 'Not enough data yet.'
     START_TIME = time.time()
-    
+
     SECONDS_PER_MINUTE = 60
     FS = 1000  # Sample at 100 Hz
     DELAY = float(1) / FS
     WINDOW_DURATION = 10  # Determine RR from a 10-second window
     #WINDOW_SIZE = int(WINDOW_DURATION / DELAY)
-    WINDOW_SIZE = 30
+    WINDOW_SIZE = 120
     global ALARM_TRIGGER_COUNTER
     ALARM_TRIGGER_COUNTER = 0
 
