@@ -111,7 +111,7 @@ def calc_rr():
     print(len(arr))
     print(arr)
     with open('test.txt', 'w') as f:
-        f.writelines([str(x) for x in arr])
+        f.writelines([str(x) + ',' for x in arr])
 
     peaks = peakutils.peak.indexes(arr, 0, 5)
     print(peaks)
