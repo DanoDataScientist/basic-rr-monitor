@@ -142,6 +142,7 @@ class GUI(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         tk.Tk.wm_title(self, "RR Monitor")
+        self.attributes('-fullscreen', True)
 
         container = tk.Frame(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
         container.pack(side="top", fill="both", expand=True)
