@@ -24,7 +24,8 @@ SCREEN_HEIGHT = 240
 
 
 def shutdown(pin):
-    call('halt', shell=False)
+    import sys
+    sys.exit(0)
 
 
 def power_on_sound():
@@ -143,7 +144,6 @@ class GUI(tk.Tk):
 
         tk.Tk.wm_title(self, "RR Monitor")
         self.attributes('-fullscreen', True)
-
         container = tk.Frame(self, width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
